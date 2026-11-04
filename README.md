@@ -107,7 +107,7 @@ flowchart TB
 
     %% HOST CONNECTION TO VIRTUALBOX
     PC --- VB
-    Laptop --- VB
+
 
     %% STYLING
     classDef firewall fill:#dce6f1,stroke:#4472c4,stroke-width:2px
