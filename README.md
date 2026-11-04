@@ -21,7 +21,7 @@ flowchart TB
     Router["Home Router<br/>10.0.0.0/24"]
 
     Internet --- Router
-8
+
     PC["Personal Computer<br/>10.0.0.245"]
 
 
