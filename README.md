@@ -23,10 +23,10 @@ flowchart TB
     Internet --- Router
 
     PC["Personal Computer<br/>192.168.1.113"]
-    Laptop["Personal Computer / Laptop<br/>192.168.1.178"]
+
 
     Router --- PC
-    Router --- Laptop
+
 
     %% VIRTUALBOX ENVIRONMENT
     subgraph VB["VirtualBox Environment"]
