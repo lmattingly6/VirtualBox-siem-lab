@@ -10,38 +10,117 @@ The goal of this project is to gain practical experience with security monitorin
 
 ## Architecture
 
-```mermaid
-flowchart TD
+flowchart TB
 
-    A[AWS SIEM / SOC Lab]
-    B[AWS VPC<br>10.0.0.0/16]
-    C[Public Subnet<br>10.0.1.0/24]
+    %% HOME NETWORK
+    Internet(("🌐 Internet"))
+    Router["Home Router<br/>192.168.1.0/24"]
 
-    D[Windows Endpoint<br>Wazuh Agent]
-    E[Linux Endpoint<br>Wazuh Agent]
+    Internet --- Router
 
-    F[Wazuh SIEM Server]
-    G[Wazuh Dashboard]
-    H[Security Investigations<br>& Incident Response]
+    PC["Personal Computer<br/>192.168.1.113"]
+    Laptop["Personal Computer / Laptop<br/>192.168.1.178"]
 
-    I[AWS CloudTrail<br>Account Activity Logs]
-    J[Amazon S3<br>CloudTrail Logs]
+    Router --- PC
+    Router --- Laptop
 
-    A --> B
-    B --> C
+    %% VIRTUALBOX ENVIRONMENT
+    subgraph VB["VirtualBox Environment"]
+        direction TB
 
-    C --> D
-    C --> E
+        FW["pfSense<br/>Virtual Router & Firewall"]
 
-    D -->|Security/Event Logs| F
-    E -->|Security/Event Logs| F
+        %% NETWORK INTERFACES
+        WAN["WAN<br/>Bridged Paravirtualized<br/>(virtio-net)"]
+        LAN["LAN<br/>Internal Network<br/>(virtio-net)"]
+        ISO["ISOLATED<br/>Internal Network"]
+        AD["AD_LAB<br/>Internal Network"]
+        VULN["VULN_EGRESS<br/>Internal Network"]
 
-    I -->|AWS Logs| J
-    J -->|CloudTrail Logs| F
+        %% NETWORK SEGMENTS
+        subgraph NET1["WAN / Management Network"]
+            direction TB
+            MGT["192.168.1.27"]
+        end
 
-    F --> G
-    G --> H
-```
+        subgraph NET2["LAN - 10.0.0.0/24"]
+            direction TB
+            SW1["L2 Switch"]
+            KALI["Kali Linux<br/>10.0.0.2"]
+            SW1 --- KALI
+        end
+
+        subgraph NET3["ISOLATED - 10.6.6.0/24"]
+            direction TB
+            SW2["L2 Switch"]
+            VH1["VulnHub VM<br/>10.6.6.13"]
+            META["Metasploitable2<br/>10.6.6.22"]
+            SW2 --- VH1
+            SW2 --- META
+        end
+
+        subgraph NET4["AD_LAB - 10.80.80.0/24"]
+            direction TB
+            SW3["L2 Switch"]
+            DC["Domain Controller<br/>10.80.80.2"]
+            WIN1["Windows 10 Enterprise 1<br/>10.80.80.32"]
+            WIN2["Windows 10 Enterprise 2<br/>10.80.80.43"]
+            SW3 --- DC
+            SW3 --- WIN1
+            SW3 --- WIN2
+        end
+
+        subgraph NET5["VULN_EGRESS - 10.10.10.0/24"]
+            direction TB
+            SW4["L2 Switch"]
+            VH2["VulnHub VM<br/>10.10.10.11"]
+            VH3["VulnHub VM<br/>10.10.10.12"]
+            SW4 --- VH2
+            SW4 --- VH3
+        end
+
+        subgraph NET6["Network Monitoring"]
+            direction TB
+            NID["NID8"]
+            WAZUH["Wazuh OVA<br/>with Suricata<br/>10.0.0.3"]
+            NID -->|"Packet Capture"| WAZUH
+        end
+
+        %% PFSENSE CONNECTIONS
+        FW --- MGT
+
+        FW ---|"10.0.0.1/24"| SW1
+        FW ---|"10.6.6.1/24"| SW2
+        FW ---|"10.80.80.1/24"| SW3
+        FW ---|"10.10.10.1/24"| SW4
+
+        %% NETWORK MONITORING
+        SW4 -.->|"Packet Capture / SPAN"| NID
+
+        %% MANAGEMENT CONNECTION
+        KALI -.->|"SSH and SIEM Management"| WAZUH
+    end
+
+    %% HOST CONNECTION TO VIRTUALBOX
+    PC --- VB
+    Laptop --- VB
+
+    %% STYLING
+    classDef firewall fill:#dce6f1,stroke:#4472c4,stroke-width:2px
+    classDef endpoint fill:#d9ead3,stroke:#6aa84f
+    classDef isolated fill:#f4cccc,stroke:#cc0000
+    classDef adlab fill:#cfe2f3,stroke:#3c78d8
+    classDef vuln fill:#fce5cd,stroke:#e69138
+    classDef monitoring fill:#cfe2f3,stroke:#6d9eeb
+    classDef infrastructure fill:#eeeeee,stroke:#666666
+
+    class FW firewall
+    class KALI endpoint
+    class VH1,META isolated
+    class DC,WIN1,WIN2 adlab
+    class VH2,VH3 vuln
+    class WAZUH,NID monitoring
+    class Router,MGT,SW1,SW2,SW3,SW4 infrastructure
 
 ## Objectives
 
