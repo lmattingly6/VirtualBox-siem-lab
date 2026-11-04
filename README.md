@@ -10,19 +10,16 @@ The goal of this project is to gain practical experience with security monitorin
 
 ## Architecture
 
+## Network Architecture
+
+```mermaid
 flowchart TB
 
     %% HOME NETWORK
-    Internet(("🌐 Internet"))
+    Internet(("Internet"))
     Router["Home Router<br/>192.168.1.0/24"]
 
     Internet --- Router
-
-    PC["Personal Computer<br/>192.168.1.113"]
-    Laptop["Personal Computer / Laptop<br/>192.168.1.178"]
-
-    Router --- PC
-    Router --- Laptop
 
     %% VIRTUALBOX ENVIRONMENT
     subgraph VB["VirtualBox Environment"]
@@ -30,28 +27,20 @@ flowchart TB
 
         FW["pfSense<br/>Virtual Router & Firewall"]
 
-        %% NETWORK INTERFACES
-        WAN["WAN<br/>Bridged Paravirtualized<br/>(virtio-net)"]
-        LAN["LAN<br/>Internal Network<br/>(virtio-net)"]
-        ISO["ISOLATED<br/>Internal Network"]
-        AD["AD_LAB<br/>Internal Network"]
-        VULN["VULN_EGRESS<br/>Internal Network"]
-
-        %% NETWORK SEGMENTS
+        %% WAN / MANAGEMENT
         subgraph NET1["WAN / Management Network"]
-            direction TB
             MGT["192.168.1.27"]
         end
 
+        %% LAN
         subgraph NET2["LAN - 10.0.0.0/24"]
-            direction TB
             SW1["L2 Switch"]
             KALI["Kali Linux<br/>10.0.0.2"]
             SW1 --- KALI
         end
 
+        %% ISOLATED NETWORK
         subgraph NET3["ISOLATED - 10.6.6.0/24"]
-            direction TB
             SW2["L2 Switch"]
             VH1["VulnHub VM<br/>10.6.6.13"]
             META["Metasploitable2<br/>10.6.6.22"]
@@ -59,8 +48,8 @@ flowchart TB
             SW2 --- META
         end
 
+        %% ACTIVE DIRECTORY LAB
         subgraph NET4["AD_LAB - 10.80.80.0/24"]
-            direction TB
             SW3["L2 Switch"]
             DC["Domain Controller<br/>10.80.80.2"]
             WIN1["Windows 10 Enterprise 1<br/>10.80.80.32"]
@@ -70,8 +59,8 @@ flowchart TB
             SW3 --- WIN2
         end
 
+        %% VULNERABLE NETWORK
         subgraph NET5["VULN_EGRESS - 10.10.10.0/24"]
-            direction TB
             SW4["L2 Switch"]
             VH2["VulnHub VM<br/>10.10.10.11"]
             VH3["VulnHub VM<br/>10.10.10.12"]
@@ -79,8 +68,8 @@ flowchart TB
             SW4 --- VH3
         end
 
+        %% NETWORK MONITORING
         subgraph NET6["Network Monitoring"]
-            direction TB
             NID["NID8"]
             WAZUH["Wazuh OVA<br/>with Suricata<br/>10.0.0.3"]
             NID -->|"Packet Capture"| WAZUH
@@ -88,7 +77,6 @@ flowchart TB
 
         %% PFSENSE CONNECTIONS
         FW --- MGT
-
         FW ---|"10.0.0.1/24"| SW1
         FW ---|"10.6.6.1/24"| SW2
         FW ---|"10.80.80.1/24"| SW3
@@ -100,10 +88,6 @@ flowchart TB
         %% MANAGEMENT CONNECTION
         KALI -.->|"SSH and SIEM Management"| WAZUH
     end
-
-    %% HOST CONNECTION TO VIRTUALBOX
-    PC --- VB
-    Laptop --- VB
 
     %% STYLING
     classDef firewall fill:#dce6f1,stroke:#4472c4,stroke-width:2px
@@ -121,6 +105,7 @@ flowchart TB
     class VH2,VH3 vuln
     class WAZUH,NID monitoring
     class Router,MGT,SW1,SW2,SW3,SW4 infrastructure
+```
 
 ## Objectives
 
