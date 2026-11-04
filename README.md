@@ -18,11 +18,11 @@ flowchart TB
 
     %% HOME NETWORK
     Internet(("🌐 Internet"))
-    Router["Home Router<br/>192.168.1.0/24"]
+    Router["Home Router<br/>10.0.0.0/24"]
 
     Internet --- Router
-
-    PC["Personal Computer<br/>192.168.1.113"]
+8
+    PC["Personal Computer<br/>10.0.0.245"]
 
 
     Router --- PC
@@ -35,16 +35,16 @@ flowchart TB
         FW["pfSense<br/>Virtual Router & Firewall"]
 
         %% NETWORK INTERFACES
-        WAN["WAN<br/>Bridged Paravirtualized<br/>(virtio-net)"]
-        LAN["LAN<br/>Internal Network<br/>(virtio-net)"]
-        ISO["ISOLATED<br/>Internal Network"]
-        AD["AD_LAB<br/>Internal Network"]
-        VULN["VULN_EGRESS<br/>Internal Network"]
+        WAN["WAN<br/>Bridged-Paravirtualized<br/>(virtio-net)"]
+        LAN["LAN<br/>Internal Network-Paravirtualized<br/>(virtio-net)"]
+        ISO["ISOLATED<br/>Internal Network-Paravirtualized"]
+        AD["AD_LAB<br/>Internal Network-Paravirtualized"]
+        VULN["VULN_EGRESS<br/>Internal Network-Paravirtualized"]
 
         %% NETWORK SEGMENTS
         subgraph NET1["WAN / Management Network"]
             direction TB
-            MGT["192.168.1.27"]
+            MGT["10.0.2.15/24"]
         end
 
         subgraph NET2["LAN - 10.0.0.0/24"]
